@@ -66,30 +66,56 @@ def limpiar_markdown(texto):
 
 
 def escribir(texto, etiqueta):
-    chat.config(state="normal")                  # desbloquea el cuadro para poder escribir
-    chat.insert(tk.END, texto + "\n\n", etiqueta)  # añade el texto al final con su estilo
-    chat.config(state="disabled")                # lo vuelve a bloquear (el usuario no puede editarlo)
+    chat.config(state="normal")                 
+    chat.insert(tk.END, texto + "\n\n", etiqueta)  
+    chat.config(state="disabled")                
     chat.see(tk.END) 
 
-def enviar(event=None):                          # event=None permite llamarla desde el botón y desde Enter
-    pregunta = entrada.get().strip()             # lee lo escrito y quita espacios sobrantes
-    if not pregunta:                             # si está vacío, no hace nada
+def enviar(event=None):                          
+    pregunta = entrada.get().strip()             
+    if not pregunta:                             
         return
     escribir("Tú: " + pregunta, "usuario")
-    entrada.delete(0, tk.END)                    # limpia el campo de texto tras enviar
-    boton.config(state="disabled")               # desactiva el botón mientras la IA responde
+    entrada.delete(0, tk.END)                    
+    boton.config(state="disabled")               
     hilo = threading.Thread(target=consultar, args=(pregunta,), daemon=True)
     hilo.start()   
 
-def consultar(pregunta):                         # se ejecuta en el hilo secundario
+def consultar(pregunta):                       
     try:
         texto = limpiar_markdown(preguntar_a_gemini(pregunta))
         ventana.after(0, mostrar_respuesta, "Asistente: " + texto, "asistente")
-    except Exception as e:                       # sin internet, clave mala, límite de uso...
+    except Exception as e:                       
         mensaje = ("Error: no se pudo contactar con el asistente. "
                    "Revisa tu conexión a internet o tu API key.\n(" + str(e) + ")")
         ventana.after(0, mostrar_respuesta, mensaje, "error")
 
-def mostrar_respuesta(texto, etiqueta):          # se ejecuta de vuelta en el hilo principal
+def mostrar_respuesta(texto, etiqueta):         
     escribir(texto, etiqueta)
     boton.config(state="normal")   
+
+ventana = tk.Tk()
+ventana.title("Asistente de Peluqueria")
+ventana.geometry("600x500")
+
+chat = scrolledtext.ScrolledText(ventana, wrap=tk.WORD, state="disabled", font=("Arial", 11))
+chat.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+chat.tag_config("usuario", foreground="blue", font=("Arial", 11, "bold"))
+chat.tag_config("asistente", foreground="green")
+chat.tag_config("error", foreground="red")
+
+marco = tk.Frame(ventana)
+marco.pack(fill=tk.X, padx=10, pady=(0, 10))
+
+
+entrada = tk.Entry(marco, font=("Arial", 11))
+entrada.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10))
+entrada.bind("<Return>", enviar)
+
+boton = tk.Button(marco, text="Enviar", command=enviar, bg="#0078D7", fg="white")
+boton.pack(side=tk.RIGHT)
+
+escribir("Bienvenido al Asistente de Peluquería.\nEscribe tu pregunta abajo y presiona 'Enviar'.", "info")
+
+ventana.mainloop()  
