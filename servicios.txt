@@ -1,7 +1,8 @@
-Bienvenido a Peluquería Brillo Estelar
+Bienvenido a Peluquería Taper Fade 
 
 Servicios disponibles:
 - Corte de cabello: $15
+- Corte Taper Fade $20
 - Tinte básico: $25
 - Tinte premium: $40
 - Peinado: $20
@@ -14,4 +15,4 @@ Horario de atención:
 - Sábado: 9:00 AM - 3:00 PM
 - Domingo: cerrado
 
-No se necesita cita previa. ¡Te esperamos!
+No se necesita cita previa puedes venir cuando puedas y te atenderemos con gusto :)
