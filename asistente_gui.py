@@ -64,3 +64,32 @@ def limpiar_markdown(texto):
         lineas.append(linea)
     return "\n".join(lineas)  
 
+
+def escribir(texto, etiqueta):
+    chat.config(state="normal")                  # desbloquea el cuadro para poder escribir
+    chat.insert(tk.END, texto + "\n\n", etiqueta)  # añade el texto al final con su estilo
+    chat.config(state="disabled")                # lo vuelve a bloquear (el usuario no puede editarlo)
+    chat.see(tk.END) 
+
+def enviar(event=None):                          # event=None permite llamarla desde el botón y desde Enter
+    pregunta = entrada.get().strip()             # lee lo escrito y quita espacios sobrantes
+    if not pregunta:                             # si está vacío, no hace nada
+        return
+    escribir("Tú: " + pregunta, "usuario")
+    entrada.delete(0, tk.END)                    # limpia el campo de texto tras enviar
+    boton.config(state="disabled")               # desactiva el botón mientras la IA responde
+    hilo = threading.Thread(target=consultar, args=(pregunta,), daemon=True)
+    hilo.start()   
+
+def consultar(pregunta):                         # se ejecuta en el hilo secundario
+    try:
+        texto = limpiar_markdown(preguntar_a_gemini(pregunta))
+        ventana.after(0, mostrar_respuesta, "Asistente: " + texto, "asistente")
+    except Exception as e:                       # sin internet, clave mala, límite de uso...
+        mensaje = ("Error: no se pudo contactar con el asistente. "
+                   "Revisa tu conexión a internet o tu API key.\n(" + str(e) + ")")
+        ventana.after(0, mostrar_respuesta, mensaje, "error")
+
+def mostrar_respuesta(texto, etiqueta):          # se ejecuta de vuelta en el hilo principal
+    escribir(texto, etiqueta)
+    boton.config(state="normal")   
